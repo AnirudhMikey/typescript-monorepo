@@ -30,7 +30,7 @@ const BROWSER_OPTIONS = {
   ]
 };
 
-// HTTP headers configuration
+// headers configuration
 const HTTP_HEADERS = {
   'Accept': 'application/json',
   'Accept-Language': 'en-US,en;q=0.9',
@@ -75,7 +75,6 @@ interface ScrapingResult {
   error?: string;
 }
 
-// Utility functions
 class Logger {
   static info(message: string): void {
     console.log(message);
@@ -130,8 +129,6 @@ class PageManager {
       waitUntil: 'networkidle2',
       timeout: 30000
     });
-
-    // Wait for cookies and session to be established
     await this.page.waitForTimeout(3000);
   }
 
@@ -207,12 +204,10 @@ class DataProcessor {
     const fulfillment = product.fulfillment;
     const ratings = product.ratings_and_reviews;
 
-    // Basic product info
     Logger.info(`Product: ${item?.product_description?.title || 'Title not found'}`);
     Logger.info(`TCIN: ${item?.tcin || 'TCIN not found'}`);
     Logger.info(`Brand: ${item?.brand || 'Brand not found'}`);
 
-    // Price information
     if (price) {
       Logger.info(`Price: $${price.current_retail || 'Price not found'}`);
       if (price.current_retail !== price.reg_retail) {
@@ -220,12 +215,10 @@ class DataProcessor {
       }
     }
 
-    // Availability
     if (fulfillment) {
       Logger.info(`Availability: ${fulfillment.shipping_options?.availability_status || 'Availability not found'}`);
     }
 
-    // Rating
     if (ratings?.statistics) {
       const stats = ratings.statistics;
       Logger.info(`Rating: ${stats.rating || 'N/A'} out of 5 (${stats.review_count || 0} reviews)`);
@@ -241,7 +234,7 @@ class DataProcessor {
   }
 }
 
-// Main scraper class
+// Main class
 class TargetScraper {
   private browserManager: BrowserManager;
   private pageManager: PageManager | null = null;
@@ -252,24 +245,19 @@ class TargetScraper {
 
   async scrape(): Promise<ScrapingResult> {
     try {
-      // Launch browser and create page
       const browser = await this.browserManager.launch();
       const page = await this.browserManager.newPage();
       this.pageManager = new PageManager(page);
 
-      // Configure and navigate
       await this.pageManager.configurePage();
       await this.pageManager.navigateToProduct();
 
-      // Get cookies and make API call
       const cookieString = await this.pageManager.getCookies();
       const productData = await TargetAPI.fetchProductData(cookieString);
 
-      // Process and display data
       DataProcessor.displayProductInfo(productData);
       DataProcessor.saveToFile(productData);
 
-      // Take screenshot
       await this.pageManager.takeScreenshot();
 
       return { success: true, data: productData };
@@ -286,7 +274,7 @@ class TargetScraper {
   }
 }
 
-// Main execution function
+// Main function
 async function scrapeTargetProduct(): Promise<void> {
   const scraper = new TargetScraper();
   
@@ -305,10 +293,8 @@ async function scrapeTargetProduct(): Promise<void> {
   }
 }
 
-// Export for module usage
 export { scrapeTargetProduct, TargetScraper, CONFIG };
 
-// Run if this is the main module
 if (require.main === module) {
   scrapeTargetProduct()
     .then(() => {
