@@ -127,4 +127,8 @@ npm install
 npx ts-node src/target-scraper.ts
 ```
 
+<<<<<<< HEAD
 This will run the scraper and extract data for the Motorola Moto G Play phone from Target.com. 
+=======
+This will run the scraper and extract data for the Motorola Moto G Play phone from Target.com. 
+>>>>>>> 44b22e399d2753aed5af9ad196ee4980c753416c
