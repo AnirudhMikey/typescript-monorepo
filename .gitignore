@@ -96,7 +96,6 @@ temp/
 
 # Generated files from web scraper
 *.png
-*.json
 target-product-data.json
 target-product-api-call.png
 amazon-product-added-to-cart.png
