@@ -2,7 +2,7 @@ import { Inject, Service } from 'typedi';
 import { BrowserManager } from '../BrowserManager';
 import { PageManager } from '../PageManager';
 import { Logger } from '../Logger';
-import { BaseScraper } from '../base/BaseScraper';
+import { BaseScraper } from '@yourorg/base-scraper';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -41,18 +41,8 @@ export class TargetScraper extends BaseScraper {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'accept-language': 'en-US,en;q=0.9',
-        'origin': 'https://www.target.com',
-        'priority': 'u=1, i',
-        'referer': CONFIG.PRODUCT_URL.split('#')[0],
-        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
         'user-agent': CONFIG.USER_AGENT,
-        'cookie': cookieString
+        'cookie': cookieString // Only if needed for authentication
       }
     });
     const json = await response.json();

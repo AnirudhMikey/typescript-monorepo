@@ -2,7 +2,7 @@ import { Inject, Service } from 'typedi';
 import { BrowserManager } from '../BrowserManager';
 import { PageManager } from '../PageManager';
 import { Logger } from '../Logger';
-import { BaseScraper } from '../base/BaseScraper';
+import { BaseScraper } from '@yourorg/base-scraper';
 import { ProductInfo } from 'types/ProductInfo';
 
 const CONFIG = {

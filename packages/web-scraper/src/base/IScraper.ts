@@ -1,1 +1,0 @@
-export { IScraper } from 'types/IScraper'; 
