@@ -3,7 +3,6 @@
   "references": [
     { "path": "./packages/types" },
     { "path": "./packages/shared" },
-    { "path": "./packages/base-scraper" },
     { "path": "./packages/web-scraper" }
   ]
 } 

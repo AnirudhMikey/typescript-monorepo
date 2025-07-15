@@ -11,16 +11,15 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "declarationMap": false,
+    "sourceMap": false,
     "types": ["node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
     "paths": {
       "shared/*": ["../shared/src/*"],
-      "types/*": ["../types/src/*"],
-      "@yourorg/base-scraper": ["../base-scraper/src"]
+      "types/*": ["../types/src/*"]
     },
     "composite": true
   },
@@ -29,7 +28,6 @@
   ],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../base-scraper" },
     { "path": "../shared" },
     { "path": "../types" }
   ]

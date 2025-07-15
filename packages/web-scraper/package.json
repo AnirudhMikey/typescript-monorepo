@@ -16,8 +16,7 @@
     "typedi": "^0.10.0",
     "reflect-metadata": "^0.1.13",
     "shared": "1.0.0",
-    "types": "1.0.0",
-    "@yourorg/base-scraper": "*"
+    "types": "1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,12 +1,14 @@
 {
   "name": "typescript-monorepo",
   "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "yarn workspaces run build"
   },
   "keywords": [],
   "author": "",

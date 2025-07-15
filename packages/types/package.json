@@ -1,6 +1,9 @@
 {
   "name": "types",
   "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build needed'"
+  },
   "main": "src/ProductInfo.ts",
   "types": "src/ProductInfo.ts"
 } 

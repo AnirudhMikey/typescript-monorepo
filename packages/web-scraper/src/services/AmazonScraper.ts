@@ -1,9 +1,9 @@
 import { Inject, Service } from 'typedi';
 import { BrowserManager } from '../BrowserManager';
-import { PageManager } from '../PageManager';
 import { Logger } from '../Logger';
-import { BaseScraper } from '@yourorg/base-scraper';
+import { IScraper } from 'types/IScraper';
 import { ProductInfo } from 'types/ProductInfo';
+import { extractAmazonProductInfo } from 'shared/domUtils';
 
 const CONFIG = {
   PRODUCT_URL: 'https://www.amazon.com/dp/B09V3HN1F5',
@@ -12,37 +12,24 @@ const CONFIG = {
 };
 
 @Service()
-export class AmazonScraper extends BaseScraper {
+export class AmazonScraper implements IScraper {
   @Inject() private browserManager!: BrowserManager;
   @Inject() private logger!: Logger;
 
   async scrape(): Promise<ProductInfo> {
     const browser = await this.browserManager.launch();
     const page = await this.browserManager.newPage();
-    const pageManager = new PageManager(page);
 
-    await pageManager.configurePage(CONFIG.USER_AGENT, {});
-    await pageManager.navigateTo(CONFIG.PRODUCT_URL);
+    await page.setUserAgent(CONFIG.USER_AGENT);
+    await page.goto(CONFIG.PRODUCT_URL, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.waitForTimeout(3000);
 
     // Use the shared DOM utility inside page.evaluate
-    const productInfo: ProductInfo = await page.evaluate(() => {
-      function getTextBySelectors(selectors: string[]): string | null {
-        for (const sel of selectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent) return el.textContent.trim();
-        }
-        return null;
-      }
+    const productInfo: ProductInfo = await page.evaluate((extractFn) => {
+      return (0, eval)(`(${extractFn})`)();
+    }, extractAmazonProductInfo.toString());
 
-      return {
-        title: getTextBySelectors(['#productTitle', 'h1', '[data-automation-id="product-title"]']) || 'Title not found',
-        price: getTextBySelectors(['.a-price-whole', '.a-price .a-offscreen', '[data-automation-id="product-price"]']) || 'Price not found',
-        rating: getTextBySelectors(['.a-icon-alt', '[data-automation-id="product-rating"]']) || 'Rating not found',
-        availability: getTextBySelectors(['#availability', '[data-automation-id="availability"]']) || 'Availability not found'
-      };
-    });
-
-    await pageManager.takeScreenshot(CONFIG.SCREENSHOT_FILE);
+    await page.screenshot({ path: CONFIG.SCREENSHOT_FILE, fullPage: true });
     await this.browserManager.close();
 
     this.logger.success('Amazon product scraped successfully!');
