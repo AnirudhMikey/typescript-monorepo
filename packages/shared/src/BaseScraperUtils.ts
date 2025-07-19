@@ -27,15 +27,15 @@ export abstract class BaseScraperUtils {
     // Configure page with headers and user agent
     await this.pageUtils.configurePage(this.config.userAgent, this.config.headers || {});
 
-    // Step 1: Login if credentials provided
+    // Login if credentials provided
     if (credentials && this.config.loginUrl && this.config.loginSelectors) {
       await this.performLogin(credentials);
     }
 
-    // Step 2: Navigate to product page
+    // Navigate to product page
     await this.navigateToProduct();
 
-    // Step 3: Get cookies and make API call if API URL is configured
+    // Get cookies and make API call if API URL is configured
     if (this.config.apiUrl) {
       const cookieString = await this.pageUtils.getCookies();
       const json = await this.makeApiCall(cookieString);
@@ -43,7 +43,7 @@ export abstract class BaseScraperUtils {
       return json;
     }
 
-    // Step 4: Take final screenshot
+    // Take final screenshot
     await this.pageUtils.takeScreenshot(this.config.screenshotFile);
     return null;
   }
@@ -73,7 +73,7 @@ export abstract class BaseScraperUtils {
   }
 
   /**
-   * Make API call using shared logic
+   * Make API call
    */
   protected async makeApiCall(cookieString: string): Promise<any> {
     if (!this.config.apiUrl) {
@@ -91,7 +91,7 @@ export abstract class BaseScraperUtils {
   }
 
   /**
-   * Save API response using shared logic
+   * Save API response
    */
   protected async saveResponse(json: any): Promise<string> {
     const filename = this.getResponseFilename();
@@ -99,12 +99,12 @@ export abstract class BaseScraperUtils {
   }
 
   /**
-   * Get screenshot prefix for this scraper (to be overridden by subclasses)
+   * Get screenshot prefix for this scraper
    */
   protected abstract getScreenshotPrefix(): string;
 
   /**
-   * Get response filename for this scraper (to be overridden by subclasses)
+   * Get response filename for this scraper
    */
   protected abstract getResponseFilename(): string;
 } 
