@@ -43,10 +43,10 @@ async function main() {
 
   try {
     const result = await scraper.scrape(credentials);
-    console.log('✅ Target scraping completed successfully!');
-    console.log('📁 Check generated screenshots and target-api-response.json');
+    console.log('Target scraping completed successfully!');
+    console.log('Check generated screenshots and target-api-response.json');
   } catch (err) {
-    console.error('❌ Error during scraping:', err);
+    console.error('Error during scraping:', err);
     process.exit(1);
   }
 }

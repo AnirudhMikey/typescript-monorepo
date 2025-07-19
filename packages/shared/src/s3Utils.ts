@@ -25,36 +25,7 @@ const s3 = new S3Client({
   })
 });
 
-export async function testS3Connection(): Promise<boolean> {
-  console.log(`🔧 Testing S3 Connection:`);
-  console.log(`   Region: ${AWS_REGION}`);
-  console.log(`   Bucket: ${BUCKET_NAME}`);
-  console.log(`   Credentials: ${AWS_ACCESS_KEY_ID ? '✅ Configured' : '❌ Missing'}`);
-  
-  if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
-    console.error('❌ AWS credentials not found in environment variables');
-    return false;
-  }
-  
-  try {
-    // Test bucket access
-    const { HeadBucketCommand } = await import('@aws-sdk/client-s3');
-    const headCommand = new HeadBucketCommand({ Bucket: BUCKET_NAME });
-    await s3.send(headCommand);
-    console.log(`✅ Successfully connected to S3 bucket: ${BUCKET_NAME}`);
-    return true;
-  } catch (error) {
-    console.error(`❌ Failed to connect to S3 bucket: ${BUCKET_NAME}`, error);
-    return false;
-  }
-}
-
 export async function uploadToS3(localFilePath: string, s3FileName: string): Promise<string> {
-  console.log(`🔧 AWS Configuration:`);
-  console.log(`   Region: ${AWS_REGION}`);
-  console.log(`   Bucket: ${BUCKET_NAME}`);
-  console.log(`   Credentials: ${AWS_ACCESS_KEY_ID ? '✅ Configured' : '❌ Missing'}`);
-  
   // Check if file exists
   if (!fs.existsSync(localFilePath)) {
     throw new Error(`Local file not found: ${localFilePath}`);
@@ -69,10 +40,10 @@ export async function uploadToS3(localFilePath: string, s3FileName: string): Pro
   });
   try {
     await s3.send(command);
-    console.log(`✅ Successfully uploaded to s3://${BUCKET_NAME}/${s3Key} in region ${AWS_REGION}`);
+    console.log(`Successfully uploaded to s3://${BUCKET_NAME}/${s3Key}`);
     return `s3://${BUCKET_NAME}/${s3Key}`;
   } catch (error) {
-    console.error(`❌ S3 upload failed in region ${AWS_REGION}:`, error);
+    console.error('S3 upload failed:', error);
     throw error;
   }
 } 
