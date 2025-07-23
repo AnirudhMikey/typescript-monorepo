@@ -8,8 +8,10 @@ This scraper follows a clean, professional architecture:
 
 - **Shared Package**: Contains all reusable utilities (`PageUtils`, `BaseScraperUtils`)
 - **Web Scraper Package**: Contains Target-specific implementation
+- **Config Folder**: All configuration (database, credentials, etc.) is in `src/config/`
 - **No Code Duplication**: All common functionality is in the shared package
 - **Type Safety**: Full TypeScript support with proper interfaces
+- **MySQL Persistence**: Scraped data is saved directly to a MySQL database
 
 ## ✨ Features
 
@@ -18,6 +20,7 @@ This scraper follows a clean, professional architecture:
 - **🌐 API Integration**: Direct API calls for data retrieval
 - **🛡️ Error Handling**: Comprehensive error handling and logging
 - **♻️ Reusable**: Built on shared utilities for easy extension
+- **💾 MySQL Storage**: All scraped JSON responses are stored in a MySQL table for later analysis
 
 ## 🚀 Quick Start
 
@@ -31,18 +34,47 @@ npm install
 npm run build
 ```
 
-### 3. Run the Scraper
+### 3. Set Up MySQL Database
+- Ensure MySQL is running.
+- Create the database and table (run once):
+```sql
+CREATE DATABASE IF NOT EXISTS scraper_db;
+USE scraper_db;
+CREATE TABLE IF NOT EXISTS scraped_results (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  data JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+- You can use the default connection settings or override with environment variables (see below).
 
-#### With Login (Recommended)
-```bash
-# Using config file
-npx ts-node src/testTargetScraper.ts
+### 4. Configure Credentials & Database
 
-# Using environment variables
-TARGET_EMAIL="your-email@example.com" TARGET_PASSWORD="your-password" npx ts-node src/testTargetScraper.ts
+#### Config Folder (Recommended)
+- All configuration is in `src/config/`:
+  - `database.ts`: MySQL connection settings
+  - `credentials.ts`: Loads credentials from env or `config.json`
+
+#### Config File Method
+Create `config.json` in the web-scraper directory:
+```json
+{
+  "targetEmail": "your-email@example.com",
+  "targetPassword": "your-password"
+}
 ```
 
-#### Without Login (Anonymous)
+#### Environment Variables
+```bash
+export TARGET_EMAIL="your-email@example.com"
+export TARGET_PASSWORD="your-password"
+export MYSQL_HOST="localhost"
+export MYSQL_USER="root"
+export MYSQL_PASSWORD=""
+export MYSQL_DATABASE="scraper_db"
+```
+
+### 5. Run the Scraper
 ```bash
 npx ts-node src/testTargetScraper.ts
 ```
@@ -62,24 +94,14 @@ The scraper generates organized output files:
 - `target-product-api-call.png` - Final screenshot
 
 ### Data
-- `target-api-response.json` - API response data
+- `target-api-response.json` - API response data (for local inspection)
+- **MySQL Table**: All JSON responses are stored in `scraped_results` in the `scraper_db` database
 
-## ⚙️ Configuration
+## ⚙️ Configuration Folder
 
-### Config File Method (Recommended)
-Create `config.json` in the web-scraper directory:
-```json
-{
-  "targetEmail": "your-email@example.com",
-  "targetPassword": "your-password"
-}
-```
-
-### Environment Variables
-```bash
-export TARGET_EMAIL="your-email@example.com"
-export TARGET_PASSWORD="your-password"
-```
+- `src/config/database.ts`: MySQL connection config
+- `src/config/credentials.ts`: Loads credentials from env or config file
+- Easily extendable for other config (e.g., S3, logging)
 
 ## 🏛️ Code Structure
 
@@ -90,8 +112,12 @@ packages/
 │   ├── BaseScraperUtils.ts   # Base scraper functionality
 │   └── domUtils.ts           # DOM utilities
 ├── web-scraper/              # Target-specific implementation
-│   ├── TargetScraper.ts      # Target scraper (clean & minimal)
-│   └── testTargetScraper.ts  # Test runner
+│   ├── src/
+│   │   ├── config/           # All configuration files
+│   │   ├── controllers/      # Controllers
+│   │   ├── services/         # Scraper and DB services
+│   │   ├── models/           # (Optional) Data models
+│   │   └── testTargetScraper.ts  # Entry point
 └── types/                    # Type definitions
 ```
 
@@ -127,6 +153,7 @@ class AmazonScraperUtils extends BaseScraperUtils {
 - **Puppeteer**: Browser automation
 - **TypeDI**: Dependency injection
 - **TypeScript**: Type safety
+- **MySQL2**: MySQL database driver
 - **Shared Package**: Reusable utilities
 
 ## 🐛 Troubleshooting
@@ -135,6 +162,7 @@ class AmazonScraperUtils extends BaseScraperUtils {
 2. **Screenshots Not Generated**: Ensure write permissions in current directory
 3. **API Call Fails**: Verify product URL and API endpoint are still valid
 4. **Build Errors**: Run `npx tsc -b` to rebuild all packages
+5. **MySQL Errors**: Ensure MySQL is running and credentials are correct
 
 ## 🎯 Professional Features
 
@@ -143,4 +171,5 @@ class AmazonScraperUtils extends BaseScraperUtils {
 - **Type Safety**: Full TypeScript support
 - **Error Handling**: Comprehensive error management
 - **Documentation**: Clear and complete documentation
-- **Reusability**: Shared utilities for easy extension 
+- **Reusability**: Shared utilities for easy extension
+- **Persistence**: All results saved to MySQL for later analysis 

@@ -1,26 +1,28 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
+import { TargetController } from './controllers/TargetController';
 import { TargetScraper } from './services/TargetScraper';
-import { BrowserManager } from '../src/BrowserManager';
-import { Logger } from '../src/Logger';
-import { LoginCredentials } from 'shared';
+import { BrowserManager } from './BrowserManager';
+import { Logger } from './Logger';
+import { SaveResultService } from './services/SaveResultService';
 import * as fs from 'fs';
 import * as path from 'path';
 
 async function main() {
-  // Register dependencies if not using typedi decorators everywhere
   Container.set(BrowserManager, new BrowserManager());
   Container.set(Logger, new Logger());
+  // Container.set(TargetScraper, new TargetScraper()); // REMOVED, let TypeDI handle
+  Container.set(SaveResultService, new SaveResultService());
 
-  const scraper = Container.get(TargetScraper);
-  
+  const controller = Container.get(TargetController);
+
   // Check for credentials from multiple sources
-  let credentials: LoginCredentials | undefined;
-  
+  let credentials: any;
+
   // Method 1: Environment variables
   const email = process.env.TARGET_EMAIL;
   const password = process.env.TARGET_PASSWORD;
-  
+
   if (email && password) {
     credentials = { email, password };
   } else {
@@ -30,9 +32,9 @@ async function main() {
       try {
         const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         if (config.targetEmail && config.targetPassword) {
-          credentials = { 
-            email: config.targetEmail, 
-            password: config.targetPassword 
+          credentials = {
+            email: config.targetEmail,
+            password: config.targetPassword
           };
         }
       } catch (error) {
@@ -42,12 +44,9 @@ async function main() {
   }
 
   try {
-    const result = await scraper.scrape(credentials);
-    console.log('Target scraping completed successfully!');
-    console.log('Check generated screenshots and target-api-response.json');
+    await controller.run(credentials);
   } catch (err) {
-    console.error('Error during scraping:', err);
-    process.exit(1);
+    console.error('Error in main:', err);
   }
 }
 

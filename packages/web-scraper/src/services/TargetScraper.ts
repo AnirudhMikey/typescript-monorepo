@@ -53,6 +53,9 @@ export class TargetScraper implements IScraper {
       const result = await this.scraperUtils.scrape(credentials);
       this.logger.success('Target scraping completed successfully!');
       return result;
+    } catch (err) {
+      this.logger.error('Scraper error: ' + err);
+      throw err;
     } finally {
       await this.browserManager.close();
     }

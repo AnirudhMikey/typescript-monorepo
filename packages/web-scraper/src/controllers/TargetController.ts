@@ -1,25 +1,29 @@
-import { TargetModel } from '../models/TargetModel';
-import { ConsoleView } from '../views/ConsoleView';
+import { Service } from 'typedi';
 import { TargetScraper } from '../services/TargetScraper';
+import { SaveResultService } from '../services/SaveResultService';
+import { cliRespond } from 'shared/src/cliRespond';
+import { Exception } from 'shared/src/Exception';
 
+@Service()
 export class TargetController {
   constructor(
-    private model: TargetModel,
-    private view: ConsoleView,
-    private scraper: TargetScraper
+    private scraper: TargetScraper,
+    private saveResultService: SaveResultService
   ) {}
 
-  async run() {
+  async run(credentials: any) {
     try {
-      const data = await this.scraper.scrape();
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `target-api-response-${timestamp}.json`;
-      const { localPath, s3Uri } = await this.model.saveApiResponse(data, filename);
-      this.view.showSuccess(`Target API response saved locally to ${localPath}`);
-      this.view.showSuccess(`Target API response uploaded to S3: ${s3Uri}`);
-      this.view.showData(data);
+      const result = await this.scraper.scrape(credentials);
+      const insertId = await this.saveResultService.saveResult(result);
+      cliRespond({ insertId, result }, 'Scraping completed and saved to MySQL', 0);
     } catch (err) {
-      this.view.showError('Error during scraping: ' + err);
+      if (err instanceof Exception) {
+        cliRespond(err.data, err.message, err.status);
+      } else {
+        console.error('Unknown error in TargetController.run:', err);
+        cliRespond(null, 'Unknown error', 1);
+      }
+      process.exit(1);
     }
   }
 } 
