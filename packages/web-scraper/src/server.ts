@@ -3,32 +3,56 @@ import { Container } from 'typedi';
 import { TargetScraper } from './services/TargetScraper';
 import { AmazonScraper } from './services/AmazonScraper';
 import { LinkedInScraper } from './services/LinkedInScraper';
+import { ScraperFramework } from 'shared';
 
 const SCRAPE_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 async function runDaemon() {
+  // Initialize the microframework
+  const framework = new ScraperFramework({
+    intervalMs: SCRAPE_INTERVAL_MS,
+    maxRetries: 3,
+    retryDelayMs: 5000
+  });
+
+  // Get scrapers from dependency injection container
   const targetScraper = Container.get(TargetScraper);
   const amazonScraper = Container.get(AmazonScraper);
   const linkedInScraper = Container.get(LinkedInScraper);
 
-  while (true) {
-    try {
-      console.log(`[${new Date().toISOString()}] Starting Target scrape...`);
-      await targetScraper.scrape();
+  // Add tasks to the framework
+  framework
+    .addTask({
+      name: 'Target',
+      scraper: targetScraper,
+      enabled: true
+    })
+    .addTask({
+      name: 'Amazon',
+      scraper: amazonScraper,
+      enabled: false
+    })
+    .addTask({
+      name: 'LinkedIn',
+      scraper: linkedInScraper,
+      enabled: false
+    });
 
-      console.log(`[${new Date().toISOString()}] Starting Amazon scrape...`);
-      await amazonScraper.scrape();
+  // Handle graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('\nReceived SIGINT, shutting down gracefully...');
+    framework.stop();
+    process.exit(0);
+  });
 
-      console.log(`[${new Date().toISOString()}] Starting LinkedIn scrape...`);
-      await linkedInScraper.scrape();
+  process.on('SIGTERM', () => {
+    console.log('\nReceived SIGTERM, shutting down gracefully...');
+    framework.stop();
+    process.exit(0);
+  });
 
-      console.log(`[${new Date().toISOString()}] Scraping complete. Waiting for next run...`);
-    } catch (err) {
-      console.error(`[${new Date().toISOString()}] Error during scraping:`, err);
-    }
-
-    await new Promise(res => setTimeout(res, SCRAPE_INTERVAL_MS));
-  }
+  // Start the framework
+  await framework.start();
 }
 
 runDaemon(); 
